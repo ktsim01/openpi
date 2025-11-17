@@ -177,8 +177,32 @@ def _decode_aloha(data: dict, *, adapt_to_pi: bool = False) -> dict:
     data["state"] = state
     return data
 
+def _robot_to_aloha_joints(arm_state_9d: np.ndarray) -> np.ndarray:
+    """
+    Convert your robot's 9-DOF arm -> 7-DOF Aloha-format arm.
+    Drops shadow joints.
+    """
+    return np.array([
+        arm_state_9d[0],  # waist
+        arm_state_9d[1],  # shoulder
+        arm_state_9d[3],  # elbow (skip shadow index 2)
+        arm_state_9d[6],  # wrist_angle
+        arm_state_9d[5],  # forearm_roll
+        arm_state_9d[7],  # wrist_rotate
+        arm_state_9d[8],  # gripper
+    ])
+
 
 def _decode_state(state: np.ndarray, *, adapt_to_pi: bool = False) -> np.ndarray:
+    left_raw = state[:9]
+    right_raw = state[9:18]
+
+    # Convert to Aloha-format joints
+    left = _robot_to_aloha_joints(left_raw)
+    right = _robot_to_aloha_joints(right_raw)
+
+    state = np.concatenate([left, right])
+
     if adapt_to_pi:
         # Flip the joints.
         state = _joint_flip_mask() * state
@@ -196,6 +220,18 @@ def _encode_actions(actions: np.ndarray, *, adapt_to_pi: bool = False) -> np.nda
 
 
 def _encode_actions_inv(actions: np.ndarray, *, adapt_to_pi: bool = False) -> np.ndarray:
+    out = []
+    for a in actions:
+        left_raw = a[:9]
+        right_raw = a[9:]
+
+        left = _robot_to_aloha_joints(left_raw)
+        right = _robot_to_aloha_joints(right_raw)
+
+        a14 = np.concatenate([left, right])
+        out.append(a14)
+
+    actions = np.stack(out, axis=0)
     if adapt_to_pi:
         actions = _joint_flip_mask() * actions
         actions[:, [6, 13]] = _gripper_from_angular_inv(actions[:, [6, 13]])

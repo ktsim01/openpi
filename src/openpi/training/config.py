@@ -816,6 +816,36 @@ _CONFIGS = [
         num_train_steps=20_000,
         batch_size=64,
     ),
+    TrainConfig(
+        name="pi05_aloha_fold_onesie_human_multiview",
+        model=pi0_config.Pi0Config(pi05=True),
+        data=LeRobotAlohaDataConfig(
+            repo_id="sriramsk/fold_onesie_human_multiview_20251113",
+            assets=AssetsConfig(
+                assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",
+                asset_id="trossen",
+            ),
+            default_prompt="uncap the pen",
+            repack_transforms=_transforms.Group(
+                inputs=[
+                    _transforms.RepackTransform(
+                        {
+                            "images": {
+                                "cam_high": "observation.images.cam_azure_kinect_back.color",
+                                "cam_left_wrist": "observation.images.cam_azure_kinect_front.color",
+                                "cam_right_wrist": "observation.images.cam_wrist",
+                            },
+                            "state": "observation.state",
+                            "actions": "action",
+                        }
+                    )
+                ]
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        num_train_steps=20_000,
+        batch_size=64,
+    ),
     #
     # Fine-tuning DROID configs.
     #
