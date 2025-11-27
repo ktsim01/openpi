@@ -194,20 +194,21 @@ def _robot_to_aloha_joints(arm_state_9d: np.ndarray) -> np.ndarray:
 
 
 def _decode_state(state: np.ndarray, *, adapt_to_pi: bool = False) -> np.ndarray:
-    left_raw = state[:9]
-    right_raw = state[9:18]
+    # left_raw = state[:9]
+    # right_raw = state[9:18]
+    
+    # print('State shape:', state.shape)
+    # # Convert to Aloha-format joints
+    # left = _robot_to_aloha_joints(left_raw)
+    # right = _robot_to_aloha_joints(right_raw)
 
-    # Convert to Aloha-format joints
-    left = _robot_to_aloha_joints(left_raw)
-    right = _robot_to_aloha_joints(right_raw)
+    # state = np.concatenate([left, right])
 
-    state = np.concatenate([left, right])
-
-    if adapt_to_pi:
-        # Flip the joints.
-        state = _joint_flip_mask() * state
-        # Reverse the gripper transformation that is being applied by the Aloha runtime.
-        state[[6, 13]] = _gripper_to_angular(state[[6, 13]])
+    # if adapt_to_pi:
+    #     # Flip the joints.
+    #     state = _joint_flip_mask() * state
+    #     # Reverse the gripper transformation that is being applied by the Aloha runtime.
+    #     state[[6, 13]] = _gripper_to_angular(state[[6, 13]])
     return state
 
 

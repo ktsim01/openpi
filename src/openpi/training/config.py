@@ -817,15 +817,15 @@ _CONFIGS = [
         batch_size=64,
     ),
     TrainConfig(
-        name="pi05_aloha_fold_onesie_human_multiview",
+        name="pi05_aloha_fold_trousers",
         model=pi0_config.Pi0Config(pi05=True),
         data=LeRobotAlohaDataConfig(
-            repo_id="sriramsk/fold_onesie_human_multiview_20251113",
+            repo_id="sriramsk/fold_trousers_MV_20251113_ss_hg",
             assets=AssetsConfig(
                 assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",
                 asset_id="trossen",
             ),
-            default_prompt="uncap the pen",
+            default_prompt="fold the trouser",
             repack_transforms=_transforms.Group(
                 inputs=[
                     _transforms.RepackTransform(
@@ -835,7 +835,7 @@ _CONFIGS = [
                                 "cam_left_wrist": "observation.images.cam_azure_kinect_front.color",
                                 "cam_right_wrist": "observation.images.cam_wrist",
                             },
-                            "state": "observation.state",
+                            "state": "observation.right_eef_pose",
                             "actions": "action",
                         }
                     )
@@ -844,7 +844,40 @@ _CONFIGS = [
         ),
         weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
         num_train_steps=20_000,
-        batch_size=64,
+        pytorch_weight_path="/home/ktsim/Projects/openpi/training_logs/",
+        batch_size=2,
+    ),
+    TrainConfig(
+        name="pi05_aloha_mug_bin",
+        model=pi0_config.Pi0Config(pi05=True),
+        data=LeRobotAlohaDataConfig(
+            repo_id="sriramsk/mug_bin_multiview_20251113_ss",
+            use_delta_joint_actions=False,
+            assets=AssetsConfig(
+                assets_dir="gs://openpi-assets/checkpoints/pi05_base/assets",
+                asset_id="trossen",
+            ),
+            default_prompt="place mug in the bin",
+            repack_transforms=_transforms.Group(
+                inputs=[
+                    _transforms.RepackTransform(
+                        {
+                            "images": {
+                                "cam_high": "observation.images.cam_azure_kinect_back.color",
+                                "cam_left_wrist": "observation.images.cam_azure_kinect_front.color",
+                                "cam_right_wrist": "observation.images.cam_wrist",
+                            },
+                            "state": "observation.right_eef_pose",
+                            "actions": "action",
+                        }
+                    )
+                ]
+            ),
+        ),
+        weight_loader=weight_loaders.CheckpointWeightLoader("gs://openpi-assets/checkpoints/pi05_base/params"),
+        num_train_steps=20_000,
+        pytorch_weight_path="/home/ktsim/Projects/openpi/training_logs/",
+        batch_size=2,
     ),
     #
     # Fine-tuning DROID configs.
